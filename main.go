@@ -1,6 +1,8 @@
 package main
 
 import (
+	"brain_vault/queue"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -26,8 +28,19 @@ func main() {
 	})
 
 	app.OnModelAfterCreate("articles").Add(func(e *core.ModelEvent) error {
-		log.Println(e.Model.TableName())
-		log.Println(e.Model.GetId())
+		record, _ := e.Dao.FindRecordById("articles", e.Model.GetId())
+
+		data := map[string]string{
+			"id":  e.Model.GetId(),
+			"url": record.GetString("url"),
+		}
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			log.Println("Error marshalling JSON:", err)
+			return err
+		}
+		log.Println(string(jsonData))
+		queue.SendMessage(string(jsonData))
 		return nil
 	})
 
