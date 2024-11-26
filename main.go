@@ -36,11 +36,14 @@ func main() {
 				PublishedTime string `json:"publishedTime"`
 			}
 
+			record, _ := app.Dao().FindRecordById("articles", id)
 			var body Article
+
 			if err := json.NewDecoder(c.Request().Body).Decode(&body); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
 			}
-			record, _ := app.Dao().FindRecordById("articles", id)
+			record.Set("title", body.Title)
+			record.Set("content_status", "loaded")
 			record.Set("content", body.Content)
 			record.Set("excerpt", body.Excerpt)
 			record.Set("length", body.Length)
