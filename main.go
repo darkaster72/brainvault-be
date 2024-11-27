@@ -2,7 +2,9 @@ package main
 
 import (
 	"brain_vault/hooks"
+	"brain_vault/queue"
 	"brain_vault/routes"
+	"brain_vault/shared"
 	"log"
 	"os"
 
@@ -13,6 +15,9 @@ import (
 
 func main() {
 	app := pocketbase.New()
+
+	appCtx := shared.AppContext{IsDev: app.IsDev()}
+	queue.Initialize(appCtx)
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		registerRoutes(app, e)
