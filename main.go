@@ -1,6 +1,7 @@
 package main
 
 import (
+	"brain_vault/models"
 	"brain_vault/queue"
 	"encoding/json"
 	"log"
@@ -23,21 +24,8 @@ func main() {
 		e.Router.POST("/api/brainvault/artices/:id/content", func(c echo.Context) error {
 			id := c.PathParam("id")
 
-			type Article struct {
-				Title         string `json:"title"`
-				Content       string `json:"content"`
-				TextContent   string `json:"textContent"`
-				Length        int    `json:"length"`
-				Excerpt       string `json:"excerpt"`
-				Byline        string `json:"byline"`
-				Dir           string `json:"dir"`
-				SiteName      string `json:"siteName"`
-				Lang          string `json:"lang"`
-				PublishedTime string `json:"publishedTime"`
-			}
-
 			record, _ := app.Dao().FindRecordById("articles", id)
-			var body Article
+			var body models.Article
 
 			if err := json.NewDecoder(c.Request().Body).Decode(&body); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
