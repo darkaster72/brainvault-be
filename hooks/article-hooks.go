@@ -8,6 +8,11 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+func OnArticleBeforeCreate(e *core.RecordCreateEvent) error {
+	e.Record.Set("content_status", "loading")
+	return nil
+}
+
 func OnArticleCreate(e *core.ModelEvent) error {
 	record, _ := e.Dao.FindRecordById("articles", e.Model.GetId())
 
