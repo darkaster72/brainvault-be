@@ -22,7 +22,9 @@ var globalSQSSender SQSSenderInterface
 
 func Initialize(appCtx shared.AppContext) {
 	ctx := context.Background()
+
 	if !appCtx.IsDev {
+		log.Printf("INFO: Initializing AWS SQS sender")
 		sqsSender, err := NewSQSSender(ctx, SQSConfig{
 			Region:   os.Getenv("AWS_REGION"),
 			QueueURL: os.Getenv("SQS_QUEUE_URL"),
@@ -32,6 +34,7 @@ func Initialize(appCtx shared.AppContext) {
 		}
 		globalSQSSender = sqsSender
 	} else {
+		log.Printf("INFO: Initializing Local SQS sender")
 		globalSQSSender = &LocalSQSSender{}
 	}
 }
@@ -96,7 +99,7 @@ func SendMessageWithDefaults(messageBody string) error {
 
 	messageID, err := globalSQSSender.SendMessage(ctx, messageBody)
 	if err != nil {
-		return fmt.Errorf("message send failed: %w", err)
+		return fmt.Errorf("Message send failed: %w", err)
 	}
 
 	log.Printf("INFO: Message sent successfully with ID: %s", messageID)
@@ -109,7 +112,8 @@ type LocalSQSSender struct{}
 // SendMessage logs the message instead of sending it to SQS
 func (l *LocalSQSSender) SendMessage(ctx context.Context, message string) (string, error) {
 	// Make a POST request to localhost:5004
-	url := "http://localhost:5004"
+	log.Println("INFO: Sending message to api: ", message)
+	url := "http://localhost:3000/fetch-article"
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer([]byte(message)))
 	if err != nil {
 		return "", fmt.Errorf("failed to create HTTP request: %w", err)
@@ -121,6 +125,7 @@ func (l *LocalSQSSender) SendMessage(ctx context.Context, message string) (strin
 	if err != nil {
 		return "", fmt.Errorf("failed to send HTTP request: %w", err)
 	}
+	log.Printf("INFO: Response status: %s", resp.Status)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {

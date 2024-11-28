@@ -21,6 +21,10 @@ func OnArticleCreate(e *core.ModelEvent) error {
 		return err
 	}
 	log.Println(string(jsonData))
-	queue.SendMessageWithDefaults(string(jsonData))
+	err = queue.SendMessageWithDefaults(string(jsonData))
+	if err != nil {
+		log.Println("Error sending message to queue:", err)
+	}
+
 	return nil
 }

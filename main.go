@@ -18,6 +18,7 @@ func main() {
 
 	appCtx := shared.AppContext{IsDev: app.IsDev()}
 	queue.Initialize(appCtx)
+	log.Println("INFO: App is running in dev mode:", app.IsDev())
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		registerRoutes(app, e)
