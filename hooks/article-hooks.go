@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"brain_vault/queue"
+	"brain_vault/utils"
 	"encoding/json"
 	"log"
 
@@ -10,6 +11,14 @@ import (
 
 func OnArticleBeforeCreate(e *core.RecordCreateEvent) error {
 	e.Record.Set("content_status", "loading")
+	url := e.Record.GetString("url")
+	normalizedURL, err := utils.NormalizeUrl(url)
+	if err != nil {
+		log.Println("Error normalizing URL:", err)
+		return err
+	}
+	e.Record.Set("url", normalizedURL)
+	e.Record.Set("title", normalizedURL)
 	return nil
 }
 
