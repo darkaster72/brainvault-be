@@ -2,11 +2,13 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"regexp"
 	"sort"
 	"strings"
-	"time"
+
+	"github.com/pocketbase/pocketbase/tools/security"
 )
 
 var TWEET_URL_REGEX = regexp.MustCompile(`^https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)(?:\/.*)?`)
@@ -130,8 +132,18 @@ func GenerateSlug(value string) string {
 	if len(slug) > 60 {
 		slug = slug[:60]
 	}
-	return fmt.Sprintf("%s-%x", slug, time.Now().Unix())
+	return fmt.Sprintf("%s-%s", slug, security.RandomString(8))
 
+}
+
+func NormalizeAndGenerateSlug(url string) (string, error) {
+	normalizedURL, err := NormalizeUrl(url)
+	if err != nil {
+		log.Println("Error normalizing URL:", err)
+		return "", err
+	}
+
+	return GenerateSlug(normalizedURL), nil
 }
 
 func slugify(value string) string {

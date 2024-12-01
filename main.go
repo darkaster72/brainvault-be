@@ -5,6 +5,7 @@ import (
 	"brain_vault/queue"
 	"brain_vault/routes"
 	"brain_vault/shared"
+	"brain_vault/utils"
 	"log"
 	"os"
 	"strings"
@@ -29,6 +30,7 @@ func main() {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		utils.SlugMigrator(app)
 		registerRoutes(app, e)
 		return nil
 	})
