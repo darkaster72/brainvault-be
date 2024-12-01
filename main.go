@@ -47,6 +47,6 @@ func registerRoutes(app *pocketbase.PocketBase, e *core.ServeEvent) {
 }
 
 func registerHooks(app *pocketbase.PocketBase) {
-	app.OnRecordBeforeCreateRequest("articles").Add(hooks.OnArticleBeforeCreate)
+	app.OnRecordBeforeCreateRequest("articles").Add(hooks.OnArticleBeforeCreate(app))
 	app.OnModelAfterCreate("articles").Add(hooks.OnArticleCreate)
 }

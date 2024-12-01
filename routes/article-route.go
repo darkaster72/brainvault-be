@@ -14,11 +14,12 @@ func SaveArticleContent(app *pocketbase.PocketBase) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		id := c.PathParam("id")
 
-		// Find the article record by ID
-		record, err := app.Dao().FindRecordById("articles", id)
+		article, err := app.Dao().FindRecordById("articles", id)
 		if err != nil {
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "Article not found"})
 		}
+		slug := article.GetString("slug")
+		content, _ := app.Dao().FindRecordById("contents", slug)
 
 		var body models.Article
 
@@ -28,18 +29,22 @@ func SaveArticleContent(app *pocketbase.PocketBase) func(c echo.Context) error {
 		}
 
 		// Update the record fields with the new data
-		record.Set("title", body.Title)
-		record.Set("content_status", "loaded")
-		record.Set("content", body.Content)
-		record.Set("excerpt", body.Excerpt)
-		record.Set("length", body.Length)
-		record.Set("byline", body.Byline)
-		record.Set("siteName", body.SiteName)
-		record.Set("lang", body.Lang)
-		record.Set("publishedTime", body.PublishedTime)
+		article.Set("title", body.Title)
+		article.Set("content_status", "loaded")
+		article.Set("excerpt", body.Excerpt)
+		article.Set("length", body.Length)
+		article.Set("byline", body.Byline)
+		article.Set("siteName", body.SiteName)
+		article.Set("lang", body.Lang)
+		article.Set("publishedTime", body.PublishedTime)
+		content.Set("content", body.Content)
+		content.Set("text_content", body.TextContent)
 
-		// Save the updated record to the database
-		if err := app.Dao().Save(record); err != nil {
+		if err := app.Dao().Save(content); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save content"})
+		}
+
+		if err := app.Dao().Save(article); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save article"})
 		}
 
