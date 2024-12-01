@@ -17,8 +17,11 @@ func OnArticleBeforeCreate(e *core.RecordCreateEvent) error {
 		log.Println("Error normalizing URL:", err)
 		return err
 	}
+
+	slug := utils.GenerateSlug(normalizedURL)
 	e.Record.Set("url", normalizedURL)
 	e.Record.Set("title", normalizedURL)
+	e.Record.Set("slug", slug)
 	return nil
 }
 

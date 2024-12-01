@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 )
 
 var TWEET_URL_REGEX = regexp.MustCompile(`^https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)(?:\/.*)?`)
@@ -122,4 +123,30 @@ func decodePath(path string) string {
 		}
 	}
 	return "/" + strings.Join(canonicalSegments, "/")
+}
+
+func GenerateSlug(value string) string {
+	slug := slugify(value)
+	if len(slug) > 60 {
+		slug = slug[:60]
+	}
+	return fmt.Sprintf("%s-%x", slug, time.Now().Unix())
+
+}
+
+func slugify(value string) string {
+	slug := strings.ToLower(value)
+
+	slug = strings.ReplaceAll(slug, " ", "-")
+
+	// Remove all non-alphanumeric characters except hyphens
+	slug = regexp.MustCompile(`[^a-z0-9-]`).ReplaceAllString(slug, "-")
+
+	// Remove consecutive hyphens
+	slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")
+
+	// Trim hyphens from the start and end
+	slug = strings.Trim(slug, "-")
+
+	return slug
 }
